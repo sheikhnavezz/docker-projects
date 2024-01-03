@@ -1,0 +1,56 @@
+Topic: How to build nodejs application with docker  (CI/CD pipeline) 
+
+Steps:
+before starting the process create dockerhub acc.
+
+1. launch instance and take ssh 
+2. sudo su 
+3. mkdir nodeapp
+4. cd nodeapp
+5. apt install npm -y
+6. npm init -y 
+7. npm i -s express
+8. vim app.js 
+		const http = require('http');
+
+		const server = http.createServer((req, res) => {
+			res.writeHead(200, { 'Content-Type': 'text/plain' });
+			res.end('Welcome to cloudblitz\n');
+		});
+
+		const PORT = process.env.PORT || 3000;
+		server.listen(PORT, () => {
+		console.log(`Server is running on port ${PORT}`);
+		});
+:wq!
+
+8. vim dockerfile
+		FROM node:12-alpine
+		RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
+		WORKDIR /home/node/app
+		COPY package*.json ./
+		USER node
+		RUN npm install
+		COPY --chown=node:node . .
+		EXPOSE 3000
+		CMD [ "node", "app.js" ]
+:wq!
+9. docker build -t mynodeapp:v1 .
+10. docker images
+11. docker run -d --name nodejsserver -p 8081:3000 mynodeapp:v1
+12. docker ps 
+13. now, goto browser and paste ip:8081 ----(you will see the nginx page)
+14. now, we have to push our image to docker hub
+	docker login -u <username of docker hub>
+	password:
+15. now, we have to tag the image 
+	docker tag mynodeapp:v1 navezsheikh/mynodeapp
+then 
+
+16. docker push navezhsheikh/mynodeapp:v1
+17. now goto docker hub console > repository > you will see the pushed image.
+18. docker logout
+
+Extra:  docker tag <image_name:tag> repo.name/image_name:tag
+		docker push repo.name/image_name:tag_name
+	
